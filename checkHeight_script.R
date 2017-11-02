@@ -18,33 +18,19 @@ students = transform(students, weight = as.numeric(as.character(weight)))
 
 students$name = c("Maria", "Franz", "Peter", "Lisa", "Hans", "Eva", "Mia", "Karl")
 
+height_diff <- round(students$height - mean(students$height), 2) * 100
 
-
-checkHeight3 = function(students.input = students){
-
-  result.frame = data.frame(matrix(NA, nrow = nrow(students.input), ncol = 2))
-  colnames(result.frame) = c("name", "difference")
-
-  male.mean = students.input %>%
-    filter(sex == "M") %>%
-    summarise(mean = mean(height))
-  female.mean = students.input %>%
-    filter(sex == "F") %>%
-    summarise(mean = mean(height))
-
-  for (i in 1:nrow(students.input)) {
-    # calculate sex-specific deviations from the mean
-    if (students.input[i, "sex"] == "F") {
-      height.diff = 100*(students.input[i,]$height - female.mean$mean)
-    }
-    else {
-      height.diff = 100*(students.input[i, ]$height - male.mean$mean)
-    }
-    result.frame[i, "name"] = as.character(students.input[i, "name"])
-    result.frame[i, "difference"] = height.diff
+(check_height_3 <- function(students){
+  for (number_of_row in 1:nrow(students)){
+    #calculate mean height of gender
+    mean_height = as.numeric(students %>%
+                               group_by(sex) %>%
+                               summarise(mean(height)) %>%
+                               filter(sex == students[number_of_row,"sex"]) %>%
+                               select("mean(height)"))
+    height_diff[number_of_row] <- round((students[number_of_row,"height"] - mean_height)*100, 2)
   }
-  return(result.frame)
-}
-
-checkHeight3(students.input = students)
-
+  check_data_frame <- data.frame(students$name, height_diff)
+  check_data_frame
+})
+check_height_3(students)
